@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: groupman
+  labels:
+    app: groupman
+spec:
+  containers:
+  - name: groupman
+    image: modularni-urad/groupman
+    imagePullPolicy: Never
+    env:
+    - name: DATABASE_URL
+      value: postgres://gandalf:passwd@postgre-service/dbname
+    - name: SESSION_SECRET
+      value: XXX
+    - name: AUTH_API
+      value: dd
+    - name: MOCKUSER
+      value: '{"id":1133,"groups":["group_admin"]}'
+    - name: REDIS_URL
+      value: redis://redis:6379
+    - name: HOST
+      value: 0.0.0.0
