@@ -12,6 +12,13 @@ export default (ctx) => {
     }).catch(next)
   })
 
+  app.get('/:uid/groups', (req, res, next) => {
+    groups.listUserGroups(req.params.uid, knex).then(info => {
+      res.json(info)
+      next()
+    }).catch(next)
+  })
+
   app.post('/:gid/:uid',
     auth.requireMembership(ROLE.ADMIN),
     JSONBodyParser,

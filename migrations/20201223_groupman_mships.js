@@ -2,7 +2,7 @@ import { TNAMES } from '../consts'
 
 exports.up = (knex, Promise) => {
   return knex.schema.createTable(TNAMES.MSHIPS, (table) => {
-    table.integer('uid').notNullable()
+    table.string('uid', 64).notNullable()
     table.integer('gid').notNullable()
     table.primary(['uid', 'gid'])
   })

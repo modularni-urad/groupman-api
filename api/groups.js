@@ -3,7 +3,7 @@ import { whereFilter } from 'knex-filter-loopback'
 import _ from 'underscore'
 import { TNAMES } from '../consts'
 
-export default { create, update, list, add2group, removeFromGroup, listGroup }
+export default { create, update, list, add2group, removeFromGroup, listGroup, listUserGroups }
 
 function list (query, knex) {
   const perPage = Number(query.perPage) || 10
@@ -40,4 +40,9 @@ function removeFromGroup(gid, uid, knex) {
 
 function listGroup(gid, knex) {
   return knex(TNAMES.MSHIPS).where({gid}).pluck('uid')
+}
+
+function listUserGroups(uid, knex) {
+  const gids = knex.select('gid').from(TNAMES.MSHIPS).where({uid})
+  return knex(TNAMES.GROUPS).whereIn('id', gids).pluck('slug')
 }
