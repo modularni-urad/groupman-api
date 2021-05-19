@@ -10,9 +10,7 @@ function list (query, knex) {
   const currentPage = Number(query.currentPage) || null
   const fields = query.fields ? query.fields.split(',') : null
   const sort = query.sort ? query.sort.split(':') : null
-  const filter = query.filter ? JSON.parse(query.filter) : null
-  let qb = knex(TNAMES.GROUPS)
-  qb = filter ? qb.where(whereFilter(filter)) : qb
+  let qb = knex(TNAMES.GROUPS).where(whereFilter(query.filter))
   qb = fields ? qb.select(fields) : qb
   qb = sort ? qb.orderBy(sort[0], sort[1]) : qb
   return currentPage ? qb.paginate({ perPage, currentPage }) : qb
@@ -20,8 +18,8 @@ function list (query, knex) {
 
 const editables = [ 'name', 'slug' ]
 
-function create (data, author, knex) {
-  data = _.pick(data, editables)
+function create (data, orgid, author, knex) {
+  data = Object.assign({ orgid }, _.pick(data, editables))
   return knex(TNAMES.GROUPS).insert(data).returning('*')
 }
 
