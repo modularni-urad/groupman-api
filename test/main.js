@@ -2,7 +2,7 @@
 // const fs = require('fs')
 import chai from 'chai'
 
-import { init } from '../server'
+import init from '../index'
 import dbinit from './utils/dbinit'
 const chaiHttp = require('chai-http')
 chai.use(chaiHttp)
