@@ -5,7 +5,7 @@ chai.should()
 
 module.exports = (g) => {
   //
-  const r = chai.request(g.baseurl)
+  const r = chai.request(g.baseurl + '/api.domain1.cz')
 
   const p1 = {
     slug: 'admins',
@@ -19,8 +19,8 @@ module.exports = (g) => {
     // })
 
     it('shall create a new item p1', async () => {
-      g.usergroups = ['group_admin']
-      const res = await r.post('/').send(p1)
+      g.mockUser.groups = ['group_admin']
+      const res = await r.post('/').send(p1).set('Authorization', 'Bearer f')
       res.status.should.equal(201)
     })
 

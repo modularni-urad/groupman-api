@@ -1,5 +1,6 @@
 
 import { whereFilter } from 'knex-filter-loopback'
+import { APIError } from 'modularni-urad-utils'
 import _ from 'underscore'
 import { TNAMES } from '../consts'
 
@@ -18,22 +19,39 @@ function list (query, knex) {
 
 const editables = [ 'name', 'slug' ]
 
-function create (data, orgid, author, knex) {
+async function create (data, orgid, author, knex) {
   data = Object.assign({ orgid }, _.pick(data, editables))
-  return knex(TNAMES.GROUPS).insert(data).returning('*')
+  try {
+    const newitem = await knex(TNAMES.GROUPS).insert(data).returning('*')
+    return newitem
+  } catch (err) {
+    throw new APIError(400, err.toString())
+  }
 }
 
 function update (id, data, knex) {
   data = _.pick(data, editables)
-  return knex(TNAMES.GROUPS).where({ id }).update(data).returning('*')
+  try {
+    return knex(TNAMES.GROUPS).where({ id }).update(data).returning('*')
+  } catch (err) {
+    throw new APIError(400, err.toString())
+  }  
 }
 
 function add2group(gid, uid, knex) {
-  return knex(TNAMES.MSHIPS).insert({uid, gid})
+  try {
+    return knex(TNAMES.MSHIPS).insert({uid, gid})
+  } catch (err) {
+    throw new APIError(400, err.toString())
+  }  
 }
 
 function removeFromGroup(gid, uid, knex) {
-  return knex(TNAMES.MSHIPS).where({uid, gid}).del()
+  try {
+    return knex(TNAMES.MSHIPS).where({uid, gid}).del()
+  } catch (err) {
+    throw new APIError(400, err.toString())
+  }
 }
 
 function listGroup(gid, knex) {

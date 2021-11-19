@@ -1,4 +1,4 @@
-import groups from './groups'
+import groups from './middleware'
 import { ROLE } from '../consts'
 
 export default (ctx) => {
@@ -19,7 +19,7 @@ export default (ctx) => {
     }).catch(next)
   })
 
-  app.post('/:gid/:uid',
+  app.post('/:gid/:uid', auth.session,
     auth.requireMembership(ROLE.ADMIN),
     JSONBodyParser,
     (req, res, next) => {
@@ -28,7 +28,7 @@ export default (ctx) => {
         .catch(next)
     })
 
-  app.delete('/:gid/:uid',
+  app.delete('/:gid/:uid', auth.session,
     auth.requireMembership(ROLE.ADMIN),
     (req, res, next) => {
       groups.removeFromGroup(req.params.gid, req.params.uid, knex)
