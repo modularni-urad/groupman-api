@@ -7,7 +7,10 @@ function tableName (tname) {
 }
 
 exports.up = (knex, Promise) => {
-  return knex.schema.createTable(tableName(TNAMES.MSHIPS), (table) => {
+  const builder = process.env.CUSTOM_MIGRATION_SCHEMA
+    ? knex.schema.withSchema(process.env.CUSTOM_MIGRATION_SCHEMA)
+    : knex.schema
+  return builder.createTable(TNAMES.MSHIPS, (table) => {
     table.string('uid', 64).notNullable()
     table.string('gid', 32).notNullable()
       .references('slug').inTable(tableName(TNAMES.GROUPS))

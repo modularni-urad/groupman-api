@@ -7,7 +7,11 @@ function tableName (tname) {
 }
 
 exports.up = (knex, Promise) => {
-  return knex.schema.createTable(tableName(TNAMES.GROUPS), (table) => {
+  const builder = process.env.CUSTOM_MIGRATION_SCHEMA
+    ? knex.schema.withSchema(process.env.CUSTOM_MIGRATION_SCHEMA)
+    : knex.schema
+
+  return builder.createTable(TNAMES.GROUPS, (table) => {
     table.string('slug', 32).notNullable()
     table.string('name', 128).notNullable()
     table.timestamp('created').notNullable().defaultTo(knex.fn.now())
