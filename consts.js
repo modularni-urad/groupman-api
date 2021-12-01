@@ -5,7 +5,7 @@ export const TNAMES = {
 }
 
 export const ROLE = {
-  ADMIN: 'group_admin'
+  ADMIN: 'group_admins' || process.env.GROUP_ADMIN_GROUP_SLUG
 }
 
 export function getQB (knex, tablename, schema) {
