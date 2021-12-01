@@ -1,19 +1,17 @@
-import groups from './middleware'
 import { ROLE } from '../consts'
 
-export default (ctx) => {
-  const { knex, auth, JSONBodyParser } = ctx
-  const app = ctx.express()
+export default (ctx, app, MW) => {
+  const { auth, bodyParser } = ctx
 
   app.get('/:gid', (req, res, next) => {
-    groups.listGroup(req.params.gid, knex).then(info => {
+    MW.listGroup(req.params.gid, req.tenantid).then(info => {
       res.json(info)
       next()
     }).catch(next)
   })
 
   app.get('/:uid/groups', (req, res, next) => {
-    groups.listUserGroups(req.params.uid, knex).then(info => {
+    MW.listUserGroups(req.params.uid, req.tenantid).then(info => {
       res.json(info)
       next()
     }).catch(next)
@@ -21,17 +19,17 @@ export default (ctx) => {
 
   app.post('/:gid/:uid', auth.session,
     auth.requireMembership(ROLE.ADMIN),
-    JSONBodyParser,
+    bodyParser,
     (req, res, next) => {
-      groups.add2group(req.params.gid, req.params.uid, knex)
-        .then(created => { res.json({status: 'ok'}) })
+      MW.add2group(req.params.gid, req.params.uid, req.tenantid)
+        .then(created => { res.status(201).json({status: 'ok'}) })
         .catch(next)
     })
 
   app.delete('/:gid/:uid', auth.session,
     auth.requireMembership(ROLE.ADMIN),
     (req, res, next) => {
-      groups.removeFromGroup(req.params.gid, req.params.uid, knex)
+      MW.removeFromGroup(req.params.gid, req.params.uid, req.tenantid)
         .then(updated => { res.json({status: 'ok'}) })
         .catch(next)
     })

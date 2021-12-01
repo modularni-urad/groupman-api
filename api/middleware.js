@@ -1,64 +1,47 @@
+import { TNAMES, getQB } from '../consts'
 
-import { whereFilter } from 'knex-filter-loopback'
-import { APIError } from 'modularni-urad-utils'
-import _ from 'underscore'
-import { TNAMES } from '../consts'
-
-export default { create, update, list, add2group, removeFromGroup, listGroup, listUserGroups }
-
-function list (query, knex) {
-  const perPage = Number(query.perPage) || 10
-  const currentPage = Number(query.currentPage) || null
-  const fields = query.fields ? query.fields.split(',') : null
-  const sort = query.sort ? query.sort.split(':') : null
-  let qb = knex(TNAMES.GROUPS).where(whereFilter(query.filter))
-  qb = fields ? qb.select(fields) : qb
-  qb = sort ? qb.orderBy(sort[0], sort[1]) : qb
-  return currentPage ? qb.paginate({ perPage, currentPage }) : qb
+const conf = {
+  tablename: TNAMES.GROUPS,
+  editables: [ 'name', 'slug' ],
+  idattr: 'slug'
 }
 
-const editables = [ 'name', 'slug' ]
+export default function (ctx) {
+  const { knex, ErrorClass } = ctx
+  const _ = ctx.require('underscore')
+  const entityMWBase = ctx.require('entity-api-base').default
+  const MW = entityMWBase(conf, knex, ErrorClass)
 
-async function create (data, orgid, author, knex) {
-  data = Object.assign({ orgid }, _.pick(data, editables))
-  try {
-    const newitem = await knex(TNAMES.GROUPS).insert(data).returning('*')
-    return newitem
-  } catch (err) {
-    throw new APIError(400, err.toString())
+  return {
+    list: function (query, schema) {
+      return MW.list(query, schema)
+    },
+    create: function (data, schema) {
+      return MW.create(data, schema)
+    },
+    update: function (id, data, schema) {
+      return MW.update(id, data, schema)
+    },
+    add2group: async function (gid, uid, schema) {
+      try {
+        const r = await getQB(knex, TNAMES.MSHIPS, schema).insert({uid, gid})
+        return r
+      } catch (err) {
+        throw new APIError(400, err.toString())
+      }
+    },
+    removeFromGroup: function (gid, uid, schema) {
+      try {
+        return getQB(knex, TNAMES.MSHIPS, schema).where({uid, gid}).del()
+      } catch (err) {
+        throw new APIError(400, err.toString())
+      }
+    },
+    listGroup: function (gid, schema) {
+      return getQB(knex, TNAMES.MSHIPS, schema).where({gid}).pluck('uid')
+    },
+    listUserGroups: function (uid, schema) {
+      return getQB(knex, TNAMES.MSHIPS, schema).select('gid').where({uid}).pluck('gid')
+    }
   }
-}
-
-function update (id, data, knex) {
-  data = _.pick(data, editables)
-  try {
-    return knex(TNAMES.GROUPS).where({ id }).update(data).returning('*')
-  } catch (err) {
-    throw new APIError(400, err.toString())
-  }  
-}
-
-function add2group(gid, uid, knex) {
-  try {
-    return knex(TNAMES.MSHIPS).insert({uid, gid})
-  } catch (err) {
-    throw new APIError(400, err.toString())
-  }  
-}
-
-function removeFromGroup(gid, uid, knex) {
-  try {
-    return knex(TNAMES.MSHIPS).where({uid, gid}).del()
-  } catch (err) {
-    throw new APIError(400, err.toString())
-  }
-}
-
-function listGroup(gid, knex) {
-  return knex(TNAMES.MSHIPS).where({gid}).pluck('uid')
-}
-
-function listUserGroups(uid, knex) {
-  const gids = knex.select('gid').from(TNAMES.MSHIPS).where({uid})
-  return knex(TNAMES.GROUPS).whereIn('id', gids).pluck('slug')
 }

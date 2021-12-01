@@ -1,11 +1,7 @@
-/* global describe it */
-const chai = require('chai')
-chai.should()
-// import _ from 'underscore'
 
 module.exports = (g) => {
   //
-  const r = chai.request(g.baseurl + '/api.domain1.cz')
+  const r = g.chai.request(g.baseurl)
 
   const p1 = {
     slug: 'admins',
@@ -24,29 +20,28 @@ module.exports = (g) => {
       res.status.should.equal(201)
     })
 
-    // it('shall update the item pok1', () => {
-    //   const change = {
-    //     name: 'pok1changed'
-    //   }
-    //   return r.put(`/tasks/${p.id}`).send(change)
-    //   .set('Authorization', g.gimliToken)
-    //   .then(res => {
-    //     res.should.have.status(200)
-    //   })
-    // })
-
     it('shall get the pok1', async () => {
-      const res = await r.get('/')
+      const res = await r.get('/').set('Authorization', 'Bearer f')
       res.status.should.equal(200)
       res.body.should.have.lengthOf(1)
       res.body[0].slug.should.equal(p1.slug)
     })
 
+    it('shall update the item pok1', async () => {
+      const change = {
+        name: 'pok1changed'
+      }
+      const res = await r.put(`/${p1.slug}`).send(change).set('Authorization', 'Bearer f')
+      res.should.have.status(200)
+    })
+
     it('shall get the pok1 with pagination', async () => {
-      const res = await r.get('/?currentPage=1&perPage=10&sort=id:asc')
+      const res = await r.get('/?currentPage=1&perPage=10&sort=slug:asc')
+          .set('Authorization', 'Bearer f')
       res.status.should.equal(200)
       res.body.data.should.have.lengthOf(1)
       res.body.data[0].slug.should.equal(p1.slug)
+      res.body.data[0].name.should.equal('pok1changed')
       res.body.pagination.currentPage = 1
     })
   })
