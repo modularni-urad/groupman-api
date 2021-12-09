@@ -14,6 +14,7 @@ export default function (ctx) {
 
   return {
     list: function (query, schema) {
+      query.filter = query.filter ? JSON.parse(query.filter) : {}
       return MW.list(query, schema)
     },
     create: function (data, schema) {
