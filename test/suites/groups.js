@@ -15,7 +15,7 @@ module.exports = (g) => {
     // })
 
     it('shall create a new item p1', async () => {
-      g.mockUser.groups = ['group_admin']
+      g.mockUser.groups = ['group_admins']
       const res = await r.post('/').send(p1).set('Authorization', 'Bearer f')
       res.status.should.equal(201)
     })
@@ -43,6 +43,15 @@ module.exports = (g) => {
       res.body.data[0].slug.should.equal(p1.slug)
       res.body.data[0].name.should.equal('pok1changed')
       res.body.pagination.currentPage = 1
+    })
+
+    it('shall get the pok1 through filter', async () => {
+      const res = await r.get(`/?filter={"slug":"${p1.slug}"}`)
+          .set('Authorization', 'Bearer f')
+      res.status.should.equal(200)
+      res.body.should.have.lengthOf(1)
+      res.body[0].slug.should.equal(p1.slug)
+      res.body[0].name.should.equal('pok1changed')
     })
   })
 }

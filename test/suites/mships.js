@@ -10,7 +10,7 @@ module.exports = (g) => {
     // })
 
     it('shall add u1 to admins', async () => {
-      g.mockUser.groups = ['group_admin']
+      g.mockUser.groups = ['group_admins']
       const res = await r.post('/admins/u1').set('Authorization', 'Bearer f')
       res.status.should.equal(201)
     })
